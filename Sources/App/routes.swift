@@ -9,19 +9,31 @@ public func routes(_ router: Router) throws {
         return "It works!"
     }
     
+    router.get("login") { req -> Future<View> in
+        return try req.view().render("login", ["name": "Leaf"])
+    }
+    
     // Basic "Hello, world!" example
     auth.get("hello") { req -> String in
         let user = try req.requireAuthenticated(User.self)
         return "Hello, world, \(user.username)!"
     }
     
-    auth.get("login") { req -> Future<String> in
-        return User.find(1, on: req).map { user in
-            guard let user = user else {
-                throw Abort(.badRequest)
+    auth.post("logon") { req -> EventLoopFuture<EventLoopFuture<View>> in
+//        let result = try req.content.decode(LoginRequest.self).wait()
+//        print(result)
+//        let user = try User.query(on: req).first().wait()
+//        if user == nil {
+//            return try req.view().render("login", ["reason": "没有该用户"])
+//        }
+//        try req.authenticate(user!)
+//        return try req.view().render("index", ["name": user?.username])
+        return User.query(on: req).first().map{user in
+            if user == nil{
+                return try req.view().render("login", ["reason": "没有该用户"])
             }
-            try req.authenticate(user)
-            return "Logged in"
+            try req.authenticate(user!)
+            return try req.view().render("index", ["name": user?.username])
         }
     }
 

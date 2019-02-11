@@ -1,5 +1,6 @@
 import FluentPostgreSQL
 import Authentication
+import Leaf
 import Vapor
 
 /// Called before your application initializes.
@@ -9,6 +10,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register providers first
     try services.register(FluentPostgreSQLProvider())
     try services.register(AuthenticationProvider())
+    try services.register(LeafProvider())
 
     /// Register routes to the router
     let router = EngineRouter.default()
@@ -16,7 +18,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(router, as: Router.self)
 
     config.prefer(MemoryKeyedCache.self, for: KeyedCache.self)
-    
+    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
     
     /// Register middleware
     var middlewares = MiddlewareConfig() // Create _empty_ middleware config
