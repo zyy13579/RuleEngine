@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+<html ng-app="SentimentApi">
+    <head>
+        <meta charset="utf-8">
+        <title>SentimentApi</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="/css/bootstrap.min.css" >
+        <script src="/js/jquery-3.3.1.min.js" ></script>
+        <script src="/js/angular.min.js" ></script>
+        <script src="/js/bootstrap.min.js" ></script>
+        <script src="/js/sweetalert2.all.js" ></script>
+        <script src="/js/ui-bootstrap-tpls-3.0.5.min.js" ></script>
+        <style>
+            
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">舆情搜索API</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">订阅者管理 <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container-fluid" ng-controller="IndexController">
+            <div class="row" style="height:600px;">
+                <div class="col-sm-1" ></div>
+                <div class="col-sm-10" >
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title">订阅者管理</div>
+                            <form>
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="query_name" class="col-sm-3 col-form-label">订阅者名称</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="query_name" placeholder="订阅者名称"  ng-model="query.name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" ng-click="get_list()">搜索</button>
+                                <button type="button" class="btn btn-success" ng-click="add()">新增</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" rowspan="2">#</th>
+                                        <th scope="col" rowspan="2">订阅者名称</th>
+                                        <th scope="col" rowspan="2">回调地址</th>
+                                        <th scope="col" rowspan="2">token</th>
+                                        <th scope="col" colspan="3">关键词序列</th>
+                                        <th scope="col" rowspan="2">排序号</th>
+                                        <th scope="col" rowspan="2">创建时间</th>
+                                        <th scope="col" rowspan="2">操作</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col">关键词</th>
+                                        <th scope="col">命中量</th>
+                                        <th scope="col">最后查询时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat-start="s in subscriber_list">
+                                        <td scope="row" rowspan="{{s.rowspan}}">{{s.id}}</td>
+                                        <td ng-click="edit(s)" rowspan="{{s.rowspan}}">{{s.name}}</td>
+                                        <td rowspan="{{s.rowspan}}">{{s.callback_url}}</td>
+                                        <td rowspan="{{s.rowspan}}">{{s.token}}</td>
+                                        <td >{{s.keyword_arr[0].keyword}}</td>
+                                        <td >{{s.keyword_arr[0].hit_count}}</td>
+                                        <td >{{s.keyword_arr[0].last_search_at}}</td>
+                                        <td rowspan="{{s.rowspan}}">{{s.sort_index}}</td>
+                                        <td rowspan="{{s.rowspan}}">{{s.created_at}}</td>
+                                        <td rowspan="{{s.rowspan}}">
+                                            <button type="button" class="btn btn-danger">删除</button>
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat-end ng-repeat="k in s.keyword_arr.slice(1)">
+                                        <td>{{k.keyword}}</td>
+                                        <td>{{k.hit_count}}</td>
+                                        <td>{{k.last_search_at}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-1" ></div>
+            </div>
+        </div>
+        <script>
+            var app = angular.module('SentimentApi', ['ui.bootstrap']);
+            app.controller('IndexController', function($scope,$timeout,$uibModal) {
+                $scope.query = {
+                    name:""
+                };
+                $scope.subscriber_list =[];
+                $scope.keyword_list = [];
+                $scope.get_list = function(){
+                    $.ajax({
+                        method:"GET",
+                        url:"/admin/subscriber/getlist",
+                        data:{
+                            name:$scope.query.name
+                        },
+                    }).done(function(result) {
+                        if(!result.success){
+                            Swal('错误', result.reason, 'error');
+                            $scope.subscriber_list = [];
+                            return;
+                        }
+                        $timeout( function(){
+                            result.list.forEach(function(item){
+                                var keyword_arr = result.keyword_list.filter(function(k){
+                                    return (k.subscriber_id == item.id);
+                                });
+                                item.keyword_arr = keyword_arr;
+                                if(keyword_arr.length>1){
+                                    item.rowspan = keyword_arr.length;
+                                }else{
+                                    item.rowspan = 1;
+                                }
+                            });
+                            $scope.subscriber_list = result.list;
+                            $scope.keyword_list = result.keyword_list;
+                        }, 0);
+                    })
+                    .fail(function(result,textStatus,errorThrown ) {
+                        alert("error");
+                    });
+                };
+                $scope.open_form = function(params){
+                    var modalInstance = $uibModal.open({
+                        animation: true,
+                        templateUrl: 'subscriber_form.html',
+                        controller: 'subscriberFormCtrl',
+                        windowClass: 'app-modal-window-md',
+                        resolve: {
+                            params: function () {
+                                return params;
+                            }
+                        }
+                    });
+                    modalInstance.result.then(function (subscriber) {
+                        $scope.save(subscriber);
+                    }, function () {
+                        console.log('Modal dismissed at: ' + new Date());
+                    });
+                };
+                $scope.add = function(){
+                    $scope.open_form();
+                };
+                $scope.edit = function(subscriber){
+                    // $.ajax({
+                    //     method:"GET",
+                    //     url:"/admin/subscriber/get_one",
+                    //     data:{
+                    //         name:$scope.query.name
+                    //     },
+                    // }).done(function(result) {
+                    //     if(!result.success){
+                    //         return;
+                    //     }
+                    //     $timeout( function(){
+                    //         $scope.subscriber_list = result.list;
+                    //     }, 0);
+                    // })
+                    // .fail(function() {
+                    //     alert("error");
+                    // })
+                    // .always(function() {
+                            
+                    // });
+                    $scope.open_form(subscriber);
+                };
+                $scope.save = function(params){
+                    $.ajax({
+                        method:"POST",
+                        url:"/admin/subscriber/save",
+                        data:params,
+                    }).done(function(result) {
+                        debugger
+                        if(!result.success){
+                            Swal('错误', result.reason, 'error');
+                            return;
+                        }
+                    })
+                    .fail(function(result) {
+                        debugger
+                        alert("error");
+                    })
+                    .always(function() {
+                            
+                    });
+                };
+                $scope.delete = function(){
+                    $.ajax({
+                        method:"POST",
+                        url:"/admin/subscriber/delete",
+                        data:{
+                            name:$scope.query.name
+                        },
+                    }).done(function(result) {
+                        if(!result.success){
+                            Swal('错误', result.reason, 'error');
+                            $scope.subscriber_list = [];
+                            return;
+                        }
+                        $timeout( function(){
+                            $scope.subscriber_list = result.list;
+                        }, 0);
+                    })
+                    .fail(function() {
+                        alert("error");
+                    })
+                    .always(function() {
+                            
+                    });
+                };
+                $scope.init = function(){
+                    $scope.get_list();
+                };
+                $scope.init();
+            });
+            app.controller('subscriberFormCtrl',["$uibModalInstance","$scope","$timeout","params", function($uibModalInstance,$scope,$timeout,params) {
+                $scope.form = {
+                    id: 0,
+                    name: "",
+                    callback_url:"",
+                    token:"",
+                    sort_index:0,
+                    created_at:new Date()
+                };
+                $scope.init_form = function(){
+                    if(params && params.id){
+                        $scope.form = params;
+                    }
+                }
+                $scope.ok = function () {
+                    $uibModalInstance.close($scope.form);
+                };
+
+                $scope.cancel = function () {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                $scope.init_form();
+            }]);
+        </script>
+    </body>
+</html>
+
+<script type="text/ng-template" id="subscriber_form.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">订阅者维护</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <form>
+            <div class="form-group row">
+                <label for="name" class="col-sm-2 col-form-label">订阅者名称</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="name" ng-model="form.name"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="callback_url" class="col-sm-2 col-form-label">回调地址</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="callback_url" ng-model="form.callback_url">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="token" class="col-sm-2 col-form-label">token</label>
+                <div class="col-sm-10">
+                    <input type="text" readonly class="form-control" id="token" ng-model="form.token">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="sort_index" class="col-sm-2 col-form-label">排序号</label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" id="sort_index" ng-model="form.sort_index">
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>

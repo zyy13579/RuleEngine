@@ -1,0 +1,11 @@
+
+{
+    "port": "$PORT:9000",
+    "host": "0.0.0.0",
+    "securityLayer": "none"
+    "pgDataBase":{
+        "address": "postgresql://estate:8FTeR5dA!@10.10.20.13:5432/estate_score",
+        "username": "",
+        "password": ""
+    }
+}

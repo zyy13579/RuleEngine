@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html ng-app="SentimentApi">
+    <head>
+        <meta charset="utf-8">
+        <title>SentimentApi</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="/css/bootstrap.min.css" >
+        <script src="/js/jquery-3.3.1.min.js" ></script>
+        <script src="/js/angular.min.js" ></script>
+        <script src="/js/bootstrap.min.js" ></script>
+        <script src="/js/sweetalert2.all.js" ></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">舆情搜索API</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <!-- <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Dropdown
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </li> -->
+                </ul>
+                <!--
+                <form class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                        </form> -->
+            </div>
+        </nav>
+        <div class="container-fluid" ng-controller="IndexController">
+            <div class="row" style="height:600px;">
+                <div class="col-sm-1" ></div>
+                <div class="col-sm-10" >
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title">舆情搜索</div>
+                            <form>
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="search_type" class="col-sm-3 col-form-label">搜索类型</label>
+                                            <div class="col-sm-9">
+                                                <select id="search_type" class="form-control" ng-options="st.name for st in search_type_arr" ng-model="query.search_type">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row" ng-show="(query.search_type.id == 1)">
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="cityName" class="col-sm-3 col-form-label">城市名</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="cityName" placeholder="城市名"  ng-model="search_type_arr[0].params.cityName">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="community_name" class="col-sm-3 col-form-label">小区名称</label>
+                                            <div class="col-sm-9">                                            
+                                                <input type="text" class="form-control" id="communityName" placeholder="小区名称"  ng-model="search_type_arr[0].params.communityName">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="building_name" class="col-sm-3 col-form-label">关键词</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="keyWords" placeholder="关键词"  ng-model="search_type_arr[0].params.keyWords">                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row" ng-show="(query.search_type.id == 2)">
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="dist_name" class="col-sm-3 col-form-label">开发商</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="developerName" placeholder="开发商"  ng-model="search_type_arr[1].params.developerName">
+                                                    </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="community_name" class="col-sm-3 col-form-label">法人</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="legalPersonName" placeholder="法人"  ng-model="search_type_arr[1].params.legalPersonName">
+                                                    </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="building_name" class="col-sm-3 col-form-label">关键词</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="keyWords" placeholder="关键词"  ng-model="search_type_arr[1].params.keyWords">
+                                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row" ng-show="(query.search_type.id == 3)">
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="dist_name" class="col-sm-3 col-form-label">城市名</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="cityName" placeholder="城市名"  ng-model="search_type_arr[2].params.cityName">
+                                                    </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="community_name" class="col-sm-3 col-form-label">事件名</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="incidentName" placeholder="事件名"  ng-model="search_type_arr[2].params.incidentName">
+                                                    </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <div class="row">
+                                            <label for="building_name" class="col-sm-3 col-form-label">关键词</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="keyWords" placeholder="关键词"  ng-model="search_type_arr[2].params.keyWords">
+                                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" ng-click="search()">搜索</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="card text-white bg-secondary" style="margin: 20px" ng-repeat="res in result_arr">
+                                <div class="card-body">
+                                    <div class="card-title">{{res._source.news_title}}</div>
+                                    <div class="card-text">概述：{{res._source.abstract}}</div>
+                                    <div class="card-text">关键词：{{res._source.search_key}}</div>
+                                    <div class="card-text">发生时间：{{res._source.created_dt}}</div>
+                                    <div class="card-text">消息来源：{{res._source.online_source}}</div>
+                                    <div class="card-text">链接：{{res._source.news_url}}<a ng-href="{{res._source.news_url}}" target="_blank">访问</a></div>
+                                    <div class="card-text">唯一码:{{res._source.sentiment_id}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-1" ></div>
+            </div>
+        </div>
+        
+        <script>
+            var app = angular.module('SentimentApi', []);
+            app.controller('IndexController', function($scope,$timeout) {
+                $scope.query = {
+                    search_type:null
+                };
+                $scope.search_type_arr = [
+                    {id:1,name:"小区舆情查询",url:"/sentiment/searchCommunity", params:{cityName:"",communityName:"",keyWords:""}},
+                    {id:2,name:"开发商、开发商法人舆情查询",url:"/sentiment/searchDeveloper", params:{developerName:"",legalPersonName:"",keyWords:""}},
+                    {id:3,name:"事件舆情查询",url:"/sentiment/searchIncident", params:{cityName:"",incidentName:"",keyWords:""}}
+                ];
+                $scope.query.search_type = $scope.search_type_arr[0];
+                $scope.result_arr =[];
+                $scope.search = function(){
+                    $.ajax({
+                        method:"POST",
+                        url:$scope.query.search_type.url,
+                        contentType: "application/json;",
+                        dataType:"json",
+                        data:JSON.stringify($scope.query.search_type.params)
+                    }).done(function(result) {
+                        if(!result.success){
+                            Swal('错误', result.reason, 'error');
+                            $scope.result_arr = [];
+                            return;
+                        }
+                        $timeout( function(){
+                            $scope.result_arr = result.data.hits.hits;
+                        }, 0);
+                    })
+                    .fail(function() {
+                        alert("error");
+                    })
+                    .always(function() {
+                        
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>
