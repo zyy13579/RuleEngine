@@ -12,6 +12,11 @@ public func routes(_ router: Router) throws {
         return req.redirect(to: "/admin")
     }
     
+    auth.get("index") { req -> Future<View> in
+        let user = try req.requireAuthenticated(User.self)
+        return try req.view().render("index", ["user": user])
+    }
+    
     router.get("login") { req -> Future<View> in
         return try req.view().render("login", ["name": "Leaf"])
     }
@@ -38,7 +43,7 @@ public func routes(_ router: Router) throws {
                 }
                 try req.authenticate(u)
 //                return try req.view().render("admin", ["user": u])
-                return req.redirect(to: "/admin")
+                return req.redirect(to: "/index")
             }
         }
     }
@@ -69,4 +74,6 @@ public func routes(_ router: Router) throws {
     router.get("users", use: userController.index)
     router.post("users", use: userController.create)
     router.delete("users", User.parameter, use: userController.delete)
+    auth.get("users/current",use: userController.current)
+    
 }

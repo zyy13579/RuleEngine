@@ -30,4 +30,9 @@ final class UserController {
             return user.delete(on: req)
             }.transform(to: .ok)
     }
+    
+    func current(_ req: Request) throws -> User {
+        let user = try req.requireAuthenticated(User.self)
+        return user
+    }
 }
