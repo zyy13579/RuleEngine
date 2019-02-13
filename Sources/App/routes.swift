@@ -43,9 +43,9 @@ public func routes(_ router: Router) throws {
         }
     }
     
-    auth.get("logout") { req -> Future<View> in
+    auth.get("logout") { req -> Response in
         try req.destroySession()
-        return try req.view().render("login", ["msg": "已经退出"])
+        return req.redirect(to: "/login")
     }
     
     auth.get("admin") { req -> Future<View> in
