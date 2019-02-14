@@ -18,5 +18,13 @@ final class AdminController {
         }
     }
     
+    func currentUser(_ req: Request) throws -> User {
+        let user = try req.requireAuthenticated(User.self)
+        return user
+    }
+    
+    func currentMenu(_ req: Request) throws -> Future<[Menu]> {
+        return Menu.query(on: req).all()
+    }
     
 }

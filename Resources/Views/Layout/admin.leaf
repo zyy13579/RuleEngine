@@ -39,7 +39,7 @@
                         <div class="dropdown profile-element">
                             <img alt="image" class="rounded-circle" src="img/profile_small.jpg"/>
                             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                                <span class="block m-t-xs font-bold">#(user.username)</span>
+                                <span class="block m-t-xs font-bold" ng-bind="data.user.username"></span>
                                 <span class="text-muted text-xs block">Art Director <b class="caret"></b></span>
                             </a>
                             <ul class="dropdown-menu animated fadeInRight m-t-xs">
@@ -601,17 +601,17 @@
                 user:{},
                 menu_arr:[]
             };
-            $scope.get_data = function(){
+            $scope.get_user_data = function(){
                 $.ajax({
                     method:"GET",
-                    url:"/users/current",
+                    url:"/admin/currentUser",
                     contentType: "application/json;",
                     dataType:"json",
                     data:{}
                 }).done(function(result) {
                     debugger
                     $timeout( function(){
-                        $scope.data.user = result.user;
+                        $scope.data.user = result;
                     }, 0);
                 })
                 .fail(function() {
@@ -621,7 +621,31 @@
                     
                 });
             };
-            $scope.get_data();
+            $scope.get_menu_data = function(){
+                $.ajax({
+                    method:"GET",
+                    url:"/admin/currentMenu",
+                    contentType: "application/json;",
+                    dataType:"json",
+                    data:{}
+                }).done(function(result) {
+                    debugger
+                    $timeout( function(){
+                        $scope.data.menu_arr = result;
+                    }, 0);
+                })
+                .fail(function() {
+                    alert("error");
+                })
+                .always(function() {
+                    
+                });
+            };
+            $scope.init_data = function(){
+                $scope.get_user_data();
+                $scope.get_menu_data();
+            };
+            $scope.init_data();
         });
     </script>
 

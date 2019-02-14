@@ -25,6 +25,7 @@ final class User: PostgreSQLModel {
         self.username = username
         self.password = password
     }
+    
 }
 
 /// Allows `Todo` to be used as a dynamic migration.

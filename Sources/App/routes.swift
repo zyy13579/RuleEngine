@@ -9,16 +9,21 @@ public func routes(_ router: Router) throws {
     let auth = router.grouped(session)
     // Basic "It works" example
     auth.get { req -> Response in
-        return req.redirect(to: "/admin")
+        return req.redirect(to: "/index")
     }
     
     auth.get("index") { req -> Future<View> in
-        let user = try req.requireAuthenticated(User.self)
-        return try req.view().render("index", ["user": user])
+        let islogon = try req.isAuthenticated(User.self)
+        if islogon == true {
+            return try req.view().render("index")
+        }
+        else{
+            return try req.view().render("login")
+        }
     }
     
     router.get("login") { req -> Future<View> in
-        return try req.view().render("login", ["name": "Leaf"])
+        return try req.view().render("login")
     }
     
     // Basic "Hello, world!" example
@@ -53,16 +58,6 @@ public func routes(_ router: Router) throws {
         return req.redirect(to: "/login")
     }
     
-    auth.get("admin") { req -> Future<View> in
-        let islogon = try req.isAuthenticated(User.self)
-        if islogon == true {
-            let user = try req.requireAuthenticated(User.self)
-            return try req.view().render("admin", ["user": user])
-        }
-        else{
-            return try req.view().render("login", ["name": "Leaf"])
-        }
-    }
 
     // Example of configuring a controller
     let todoController = TodoController()
@@ -74,6 +69,13 @@ public func routes(_ router: Router) throws {
     router.get("users", use: userController.index)
     router.post("users", use: userController.create)
     router.delete("users", User.parameter, use: userController.delete)
-    auth.get("users/current",use: userController.current)
     
+    let menuController = MenuController()
+    router.get("menus", use: menuController.index)
+    router.post("menus", use: menuController.create)
+    router.delete("menus", Menu.parameter, use: menuController.delete)
+    
+    let adminController = AdminController()
+    auth.get("admin/currentUser",use: adminController.currentUser)
+    auth.get("admin/currentMenu",use: adminController.currentMenu)
 }
