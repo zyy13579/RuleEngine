@@ -54,11 +54,11 @@
                             RE+
                         </div>
                     </li>
-                    <li ng-repeat="menu in data.root_menu_arr" class="active"> 
-                        <a ng-if="menu.canClick==true" ng-href="menu.url"><i class="fa fa-diamond"></i> <span class="nav-label" ng-bind="menu.name"></span></a>
-                        <a ng-if="menu.canClick==false" ng-href="menu.url"><i class="fa fa-th-large"></i> <span class="nav-label" ng-bind="menu.name"></span> <span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level" ng-if="menu.children" >
-                            <li ng-repeat="cmenu in menu.children" ><a ng-href="cmenu.url" ng-bind="cmenu.name"></a></li>
+                    <li ng-repeat="menu in data.root_menu_arr" ng-class="{'active':menu.active}" after-render="init_script()"> 
+                        <a ng-if="menu.canClick==true" ng-href="{{menu.url}}"><i class="fa fa-diamond"></i> <span class="nav-label" ng-bind="menu.name"></span></a>
+                        <a ng-if="menu.canClick==false" ng-href="{{menu.url}}"><i class="fa fa-th-large"></i> <span class="nav-label" ng-bind="menu.name"></span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse"  ng-class="{'collapse':!menu.active}" ng-if="menu.children.length>0" >
+                            <li ng-repeat="cmenu in menu.children"  ng-class="{'active':cmenu.active}" ><a ng-href="{{cmenu.url}}" ng-bind="cmenu.name"></a></li>
                         </ul>
                     </li>
                     <!--
@@ -605,6 +605,17 @@
 
     <script>
         var app = angular.module('RuleEngine', []);
+        app.directive('afterRender', ['$timeout', function($timeout) {
+            return function(scope, element, attrs) {
+                $timeout(function() {
+                    if (scope.$last) {
+                        if (attrs) {
+                            scope.$eval(attrs.afterRender);
+                        }
+                    }
+                });
+            };
+        }]);
         app.controller('IndexController', function($scope,$timeout) {
             $scope.data = {
                 user:{},
@@ -656,8 +667,29 @@
                     var cmenus = $scope.get_children_menus(item);
                     item.children = cmenus;
                 });
+                $scope.set_menu_active_state(tmp_root_menus);
                 debugger
                 $scope.data.root_menu_arr = tmp_root_menus;
+            };
+            $scope.set_menu_active_state = function(tmp_root_menus){
+                var url = window.location.pathname;
+                tmp_root_menus.forEach(function(item){
+                    item.active = false;
+                    if(item.url!="" && url.indexOf(item.url) == 0){
+                        item.active = true;
+                    }
+                    if(item.children){
+                        item.children.forEach(function(citem){
+                            if(citem.url!="" && url.indexOf(citem.url) == 0){
+                                citem.active = true;
+                                item.active = true;
+                            }
+                            else{
+                                citem.active = false;
+                            }
+                        });
+                    }
+                });
             };
             $scope.get_root_menus = function(){
                 var rmenus = $scope.data.menu_arr.filter(function(item){
@@ -680,6 +712,10 @@
             $scope.init_data = function(){
                 $scope.get_user_data();
                 $scope.get_menu_data();
+            };
+            $scope.init_script = function(){
+                debugger
+                $(".metismenu").metisMenu();
             };
             $scope.init_data();
         });
