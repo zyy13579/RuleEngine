@@ -54,6 +54,14 @@
                             RE+
                         </div>
                     </li>
+                    <li ng-repeat="menu in data.root_menu_arr" class="active"> 
+                        <a ng-if="menu.canClick==true" ng-href="menu.url"><i class="fa fa-diamond"></i> <span class="nav-label" ng-bind="menu.name"></span></a>
+                        <a ng-if="menu.canClick==false" ng-href="menu.url"><i class="fa fa-th-large"></i> <span class="nav-label" ng-bind="menu.name"></span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level" ng-if="menu.children" >
+                            <li ng-repeat="cmenu in menu.children" ><a ng-href="cmenu.url" ng-bind="cmenu.name"></a></li>
+                        </ul>
+                    </li>
+                    <!--
                     <li class="active">
                         <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Dashboards</span> <span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
@@ -76,6 +84,7 @@
                             <li><a href="email_template.html">Email templates</a></li>
                         </ul>
                     </li>
+                    -->
                 </ul>
 
             </div>
@@ -599,7 +608,8 @@
         app.controller('IndexController', function($scope,$timeout) {
             $scope.data = {
                 user:{},
-                menu_arr:[]
+                menu_arr:[],
+                root_menu_arr:[]
             };
             $scope.get_user_data = function(){
                 $.ajax({
@@ -609,7 +619,6 @@
                     dataType:"json",
                     data:{}
                 }).done(function(result) {
-                    debugger
                     $timeout( function(){
                         $scope.data.user = result;
                     }, 0);
@@ -629,9 +638,9 @@
                     dataType:"json",
                     data:{}
                 }).done(function(result) {
-                    debugger
                     $timeout( function(){
                         $scope.data.menu_arr = result;
+                        $scope.reloc_menu();
                     }, 0);
                 })
                 .fail(function() {
@@ -640,6 +649,33 @@
                 .always(function() {
                     
                 });
+            };
+            $scope.reloc_menu = function(){
+                var tmp_root_menus = $scope.get_root_menus();
+                tmp_root_menus.forEach(function(item){
+                    var cmenus = $scope.get_children_menus(item);
+                    item.children = cmenus;
+                });
+                debugger
+                $scope.data.root_menu_arr = tmp_root_menus;
+            };
+            $scope.get_root_menus = function(){
+                var rmenus = $scope.data.menu_arr.filter(function(item){
+                    return (!item.parentId)
+                });
+                rmenus = rmenus.sort(function(a,b){
+                    return (a.sort-b.sort);
+                });
+                return rmenus;
+            };
+            $scope.get_children_menus = function(fmenu){
+                var cmenus = $scope.data.menu_arr.filter(function(item){
+                    return (item.parentId && item.parentId == fmenu.id)
+                });
+                cmenus = cmenus.sort(function(a,b){
+                    return (a.sort-b.sort);
+                });
+                return cmenus;
             };
             $scope.init_data = function(){
                 $scope.get_user_data();
