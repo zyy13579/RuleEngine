@@ -54,7 +54,7 @@
                             RE+
                         </div>
                     </li>
-                    <li ng-repeat="menu in data.root_menu_arr" ng-class="{'active':menu.active}" after-render="init_script()"> 
+                    <li ng-repeat="menu in data.root_menu_arr" ng-class="{'active':menu.active}" after-render="init_script()" ng-click="menu_click(menu)"> 
                         <a ng-if="menu.canClick==true" ng-href="{{menu.url}}"><i class="fa fa-diamond"></i> <span class="nav-label" ng-bind="menu.name"></span></a>
                         <a ng-if="menu.canClick==false" ng-href="{{menu.url}}"><i class="fa fa-th-large"></i> <span class="nav-label" ng-bind="menu.name"></span><span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level collapse"  ng-class="{'collapse':!menu.active}" ng-if="menu.children.length>0" >
@@ -668,7 +668,6 @@
                     item.children = cmenus;
                 });
                 $scope.set_menu_active_state(tmp_root_menus);
-                debugger
                 $scope.data.root_menu_arr = tmp_root_menus;
             };
             $scope.set_menu_active_state = function(tmp_root_menus){
@@ -709,12 +708,22 @@
                 });
                 return cmenus;
             };
+            $scope.menu_click = function(menu){
+                menu.active = !menu.active;
+                if(menu.active == false){
+                    return;
+                }
+                $scope.data.root_menu_arr.forEach(function(item){
+                    if(item!=menu){
+                        item.active = false;
+                    }
+                })
+            };
             $scope.init_data = function(){
                 $scope.get_user_data();
                 $scope.get_menu_data();
             };
             $scope.init_script = function(){
-                debugger
                 $(".metismenu").metisMenu();
             };
             $scope.init_data();
