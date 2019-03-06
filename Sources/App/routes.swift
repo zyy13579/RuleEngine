@@ -66,6 +66,7 @@ public func routes(_ router: Router) throws {
     router.delete("todos", Todo.parameter, use: todoController.delete)
     
     let userController = UserController()
+    router.get("users/list", use: userController.list)
     router.get("users", use: userController.index)
     router.post("users", use: userController.create)
     router.delete("users", User.parameter, use: userController.delete)

@@ -10,7 +10,12 @@ import Crypto
 
 /// Controls basic CRUD operations on `Todo`s.
 final class UserController {
+    
     /// Returns a list of all `Todo`s.
+    func list(_ req: Request) throws -> Future<View> {
+        return try req.view().render("user/list")
+    }
+    
     func index(_ req: Request) throws -> Future<[User]> {
         return User.query(on: req).all()
     }
