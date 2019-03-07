@@ -25,6 +25,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     middlewares.use(SessionsMiddleware.self)
+//    middlewares.use(AuthMiddleware.self)
     services.register(middlewares)
 
     // Configure a postgres database

@@ -42,6 +42,12 @@ final class Menu: PostgreSQLModel {
     }
 }
 
+extension Menu {
+    var children: Children<Menu, Menu> {
+        return children(\.parentId)
+    }
+}
+
 /// Allows `Todo` to be used as a dynamic migration.
 extension Menu: Migration { }
 
